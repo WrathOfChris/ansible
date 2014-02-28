@@ -147,6 +147,11 @@ def _list(regions):
                 # Create group if not exist and add the server
                 groups[group].append(server.name)
 
+            # Metadata becomes tag_key_value groups
+            for tagkey, tagval in server.metadata.iteritems():
+                group = "tag_%s_%s" % (tagkey, tagval)
+                groups[group].append(server.name)
+
             # Add host metadata
             keys = [key for key in vars(server) if key not in ('manager', '_info')]
             for key in keys:
@@ -161,6 +166,9 @@ def _list(regions):
 
             # And finally, add an IP address
             hostvars[server.name]['ansible_ssh_host'] = server.accessIPv4
+
+            # Add region
+            hostvars[server.name]['rax_region'] = region
 
     if hostvars:
         groups['_meta'] = {'hostvars': hostvars}
